@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2c3e50">
+<title>我的工具箱</title>
+<style>
+:root {
+  --bg: #f5f6f8; --card: #ffffff; --text: #2c3e50;
+  --text-light: #7f8c8d; --border: #e8e8e8;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08); --radius: 20px;
+  --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh; color: var(--text);
+  padding: max(40px, var(--safe-top)) 20px max(40px, var(--safe-bottom));
+  display: flex; flex-direction: column; align-items: center;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 登录页面 */
+.login-overlay {
+  position: fixed; inset: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex; justify-content: center; align-items: center; z-index: 300;
+}
+.login-box {
+  background: var(--card); border-radius: var(--radius);
+  padding: 40px 28px; width: 90%; max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid var(--border);
+  text-align: center;
+}
+.login-box .logo { font-size: 48px; margin-bottom: 8px; }
+.login-box h2 { margin-bottom: 6px; color: var(--text); font-size: 22px; }
+.login-box .subtitle { color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
+.login-box input {
+  width: 100%; padding: 14px 16px; border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 15px; margin-bottom: 12px;
+  -webkit-appearance: none;
+}
+.login-box input:focus { outline: none; border-color: #667eea; }
+.login-box .btn-login {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.login-box .btn-login:active { opacity: 0.85; }
+.login-box .hint { font-size: 12px; color: var(--text-light); margin-top: 16px; line-height: 1.5; }
+
+/* 工具箱页面 */
+.header { text-align: center; margin-bottom: 32px; }
+.header h1 { font-size: 28px; color: #fff; font-weight: 700; margin-bottom: 4px; }
+.header p { font-size: 14px; color: rgba(255,255,255,0.8); }
+.user-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 400px; margin-bottom: 20px;
+  padding: 10px 16px; background: rgba(255,255,255,0.15);
+  border-radius: 12px; backdrop-filter: blur(10px);
+}
+.user-bar .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #fff; }
+.user-bar .user-name { font-weight: 600; }
+.user-bar .logout-btn {
+  padding: 5px 12px; border-radius: 8px; border: none;
+  background: rgba(255,255,255,0.2); color: #fff; font-size: 12px;
+  font-weight: 600; cursor: pointer;
+}
+.user-bar .logout-btn:active { background: rgba(255,255,255,0.3); }
+.tools-grid {
+  display: grid; grid-template-columns: 1fr; gap: 14px;
+  width: 100%; max-width: 400px;
+}
+.tool-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 18px 22px; text-decoration: none; color: var(--text);
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: all 0.3s; display: flex; align-items: center; gap: 16px;
+  cursor: pointer;
+}
+.tool-card:hover, .tool-card:active { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+.tool-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.tool-card.calendar .tool-icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+.tool-card.vault .tool-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.tool-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.tool-info p { font-size: 12px; color: var(--text-light); }
+.arrow { margin-left: auto; font-size: 18px; color: var(--text-light); }
+.footer {
+  margin-top: auto; padding-top: 32px;
+  text-align: center; color: rgba(255,255,255,0.5);
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<!-- 统一登录页面 -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">🔧</div>
+    <h2>我的工具箱</h2>
+    <p class="subtitle">一个账号，畅游所有工具</p>
+    <input type="text" id="loginUser" placeholder="账号" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    <input type="password" id="loginPass" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">登录</button>
+    <p class="hint">没有账号？直接输入即可自动创建<br>账号密码请牢记，所有工具通用</p>
+  </div>
+</div>
+
+<!-- 工具箱页面 -->
+<div id="toolbox" style="display:none;width:100%;display:flex;flex-direction:column;align-items:center;">
+  <div class="header">
+    <h1>🔧 我的工具箱</h1>
+    <p>安全、便捷的个人工具集合</p>
+  </div>
+
+  <div class="user-bar">
+    <div class="user-info">
+      <span>👤 当前账号：<span class="user-name" id="userName"></span></span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">退出</button>
+  </div>
+
+  <div class="tools-grid">
+    <!-- 工具 1: 备忘录日历 -->
+    <a href="./calendar.html" class="tool-card calendar">
+      <div class="tool-icon">📅</div>
+      <div class="tool-info">
+        <h3>备忘录日历</h3>
+        <p>记录日程、设置优先级、多设备同步</p>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+
+    <!-- 工具 2: 密码管理器 -->
+    <a href="./vault.html" class="tool-card vault">
+      <div class="tool-icon">🔐</div>
+      <div class="tool-info">
+        <h3>密码管理器</h3>
+        <p>安全存储密码、自动填充、加密保护</p>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+
+    <!-- 
+      ============================================
+      添加新工具的接口：
+
+      1. 复制下面的模板，修改内容：
+
+      <a href="./你的页面.html" class="tool-card 分类名">
+        <div class="tool-icon">🎨</div>
+        <div class="tool-info">
+          <h3>工具名称</h3>
+          <p>工具描述</p>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+
+      2. 在 <style> 里添加颜色：
+      .tool-card.分类名 .tool-icon { 
+        background: linear-gradient(135deg, #主色, #辅色); 
+      }
+      ============================================
+    -->
+  </div>
+
+  <div class="footer">
+    <p>所有数据端到端加密，服务器无法读取</p>
+  </div>
+</div>
+
+<script>
+// 统一账号系统
+const AUTH_KEY = 'toolbox_auth';
+
+function init() {
+  const auth = getAuth();
+  if (auth && auth.user && auth.pass) {
+    showToolbox(auth.user);
+  }
+}
+
+function getAuth() {
+  try {
+    const saved = localStorage.getItem(AUTH_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch(e) { return null; }
+}
+
+function setAuth(user, pass) {
+  localStorage.setItem(AUTH_KEY, JSON.stringify({ user, pass }));
+}
+
+function clearAuth() {
+  localStorage.removeItem(AUTH_KEY);
+}
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (!user || !pass) { alert('请输入账号和密码'); return; }
+  if (user.length < 3 || pass.length < 4) { alert('账号至少3位，密码至少4位'); return; }
+
+  setAuth(user, pass);
+  document.getElementById('loginOverlay').style.display = 'none';
+  showToolbox(user);
+}
+
+function showToolbox(user) {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('toolbox').style.display = 'flex';
+  document.getElementById('userName').textContent = user;
+}
+
+function doLogout() {
+  clearAuth();
+  document.getElementById('toolbox').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+init();
+</script>
+
+</body>
+</html>
